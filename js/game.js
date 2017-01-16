@@ -1,12 +1,12 @@
-const Aviator = (function() {
+const Aviator = (function () {
 
     const colors = {
-        red:0xf25346,
-        white:0xd8d0d1,
-        brown:0x59332e,
-        pink:0xF5986E,
-        brownDark:0x23190f,
-        blue:0x68c3c0
+        red: 0xf25346,
+        white: 0xd8d0d1,
+        brown: 0x59332e,
+        pink: 0xF5986E,
+        brownDark: 0x23190f,
+        blue: 0x68c3c0
     };
 
     let height;
@@ -29,6 +29,8 @@ const Aviator = (function() {
     let sky;
     let airplane;
 
+    let mousePosition = {x: 0, y: 0};
+
     function setup(gameElementId) {
         createScene(gameElementId);
         createLights();
@@ -37,12 +39,21 @@ const Aviator = (function() {
         createSea();
         createSky();
 
+        document.addEventListener('mousemove', handleMouseMove, false);
+
         draw();
     }
 
     function draw() {
         renderer.render(scene, camera);
+        updateScene();
         requestAnimationFrame(draw);
+    }
+
+    function updateScene() {
+        updatePlane();
+        sea.mesh.rotation.z += .005;
+        sky.mesh.rotation.z += .01;
     }
 
     function createScene(gameElementId) {
@@ -80,6 +91,27 @@ const Aviator = (function() {
         renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
+    }
+
+    function handleMouseMove(event) {
+        const tx = -1 + (event.clientX / width) * 2;
+        const ty = 1 - (event.clientY / height) * 2;
+        mousePosition = {x: tx, y: ty};
+    }
+
+    function updatePlane(){
+        airplane.mesh.position.y = normalize(mousePosition.y, -1, 1, 25, 175);
+        airplane.mesh.position.x = normalize(mousePosition.x, -1, 1, -100, 100);
+        airplane.propeller.rotation.x += 0.3;
+    }
+
+    function normalize(v, vmin, vmax, tmin, tmax) {
+        const nv = Math.max(Math.min(v, vmax), vmin);
+        const dv = vmax - vmin;
+        const pc = (nv - vmin) / dv;
+        const dt = tmax - tmin;
+        const tv = tmin + (pc * dt);
+        return tv;
     }
 
     function createLights() {
@@ -128,7 +160,7 @@ const Aviator = (function() {
     function Cloud() {
         this.mesh = new THREE.Object3D();
 
-        const geometry = new THREE.BoxGeometry(20,20,20);
+        const geometry = new THREE.BoxGeometry(20, 20, 20);
         const material = new THREE.MeshPhongMaterial({
             color: colors.white,
         });
