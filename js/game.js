@@ -101,9 +101,17 @@ const Aviator = (function () {
     }
 
     function updatePlane(){
-        airplane.mesh.position.y = normalize(mousePosition.y, -1, 1, 25, 175);
-        airplane.mesh.position.x = normalize(mousePosition.x, -1, 1, -100, 100);
+        const targetY = normalize(mousePosition.y, -.75, .75, 25, 175);
+        const targetX = normalize(mousePosition.x, -.75, .75, -100, 100);
+
+        airplane.mesh.position.y += (targetY - airplane.mesh.position.y) * 0.1;
+        airplane.mesh.position.x += (targetX - airplane.mesh.position.x) * 0.1;
+
+        airplane.mesh.rotation.z = (targetY - airplane.mesh.position.y) * 0.0128;
+        airplane.mesh.rotation.x = (airplane.mesh.position.y - targetY) * 0.0064;
+
         airplane.propeller.rotation.x += 0.3;
+
         airplane.pilot.updateHairs();
     }
 
@@ -133,6 +141,9 @@ const Aviator = (function () {
         shadowLight.shadow.mapSize.width = 2048;
         shadowLight.shadow.mapSize.height = 2048;
 
+        const ambientLight = new THREE.AmbientLight(0xd88a82, 0.25);
+
+        scene.add(ambientLight);
         scene.add(hemisphereLight);
         scene.add(shadowLight);
     }
